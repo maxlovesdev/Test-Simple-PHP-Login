@@ -1,7 +1,6 @@
 <?php 
 //Connects to your Database 
-mysql_connect("db location", "username", "password") or die(mysql_error()); 
-mysql_select_db("database name") or die(mysql_error()); 
+$conn = mysqli_connect("localhost", "root", "", "test_login") or die(mysqli_connect_error()); 
 
 //This code runs if the form has been submitted
 if (isset($_POST['submit'])) { 
@@ -12,14 +11,10 @@ if (!$_POST['username'] | !$_POST['pass'] | !$_POST['pass2'] ) {
 }
 
 // checks if the username is in use
-if (!get_magic_quotes_gpc()) {
-	$_POST['username'] = addslashes($_POST['username']);
-}
-
-$usercheck = $_POST['username'];
-$check = mysql_query("SELECT username FROM users WHERE username = '$usercheck'") 
-or die(mysql_error());
-$check2 = mysql_num_rows($check);
+$usercheck = mysqli_real_escape_string($conn, $_POST['username']);
+$check = mysqli_query($conn, "SELECT username FROM users WHERE username = '$usercheck'") 
+or die(mysqli_error($conn));
+$check2 = mysqli_num_rows($check);
 
 //if the name exists it gives an error
 if ($check2 != 0) {
@@ -33,15 +28,11 @@ if ($_POST['pass'] != $_POST['pass2']) {
 
 // here we encrypt the password and add slashes if needed
 $_POST['pass'] = md5($_POST['pass']);
-
-if (!get_magic_quotes_gpc()) {
-	$_POST['pass'] = addslashes($_POST['pass']);
-	$_POST['username'] = addslashes($_POST['username']);
-}
+$_POST['username'] = mysqli_real_escape_string($conn, $_POST['username']);
 
 // now we insert it into the database
 $insert = "INSERT INTO users (username, password) VALUES ('".$_POST['username']."', '".$_POST['pass']."')";
-$add_member = mysql_query($insert);
+$add_member = mysqli_query($conn, $insert);
 ?>
 
  <h1>Registered</h1>
