@@ -104,7 +104,7 @@ if (isset($_POST['submit'])) {
 
         <!-- Image Section -->
         <div class="w-1/2 shadow-2xl">
-            <img class="object-cover w-full h-screen hidden md:block" src="https://source.unsplash.com/IXUM4cJynP0" alt="Background">
+            <img class="object-cover w-full h-screen hidden md:block" src="./img/background.png" alt="Background">
         </div>
 
     </div>
