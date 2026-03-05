@@ -4,15 +4,20 @@
 $conect = mysqli_connect("localhost", "root", "", "test_login") or die(mysqli_connect_error()); 
 
 //Checks if there is a login cookie
-if(isset($_COOKIE['ID_your_site'])){ //if there is, it logs you in and directes you to the members page
- 	$username = $_COOKIE['ID_your_site']; 
+if(isset($_COOKIE['ID_your_site'])){
+ 	$username = mysqli_real_escape_string($conect, $_COOKIE['ID_your_site']); 
  	$pass = $_COOKIE['Key_your_site'];
- 	$check = mysqli_query($conect, "SELECT * FROM users WHERE username = '$username'")or die(mysql_error());
+ 	$check = mysqli_query($conect, "SELECT * FROM users WHERE username = '$username'") or die(mysqli_error($conect));
 
- 	while($info = mysqli_fetch_array( $check )){
- 		if ($pass != $info['password']){}
- 		else{
- 			header("Location: login.php");
+ 	while($info = mysqli_fetch_array($check)){
+ 		if ($pass != $info['password']){
+ 			// wrong cookie password, clear and show login form
+ 			setcookie('ID_your_site', '', time() - 3600);
+ 			setcookie('Key_your_site', '', time() - 3600);
+		} else {
+ 			// already logged in, go to members area
+ 			header("Location: members.php");
+ 			exit();
 		}
  	}
  }
@@ -29,36 +34,31 @@ if(isset($_COOKIE['ID_your_site'])){ //if there is, it logs you in and directes 
  	}
 
  	// checks it against the database
- 	if (!get_magic_quotes_gpc()){
- 		$_POST['email'] = addslashes($_POST['email']);
- 	}
+ 	$username = mysqli_real_escape_string($conect, $_POST['username']);
+ 	$check = mysqli_query($conect, "SELECT * FROM users WHERE username = '$username'") or die(mysqli_error($conect));
 
- 	$check = mysqli_query($conect, "SELECT * FROM users WHERE username = '".$_POST['username']."'")or die(mysql_error());
-
- //Gives error if user dosen't exist
+ //Gives error if user doesn't exist
  $check2 = mysqli_num_rows($check);
  if ($check2 == 0){
 	die('That user does not exist in our database.<br /><br />If you think this is wrong <a href="login.php">try again</a>.');
 }
 
-while($info = mysqli_fetch_array( $check )){
-	$_POST['pass'] = stripslashes($_POST['pass']);
- 	$info['password'] = stripslashes($info['password']);
- 	$_POST['pass'] = md5($_POST['pass']);
+while($info = mysqli_fetch_array($check)){
+	$pass = md5(stripslashes($_POST['pass']));
 
 	//gives error if the password is wrong
- 	if ($_POST['pass'] != $info['password']){
+ 	if ($pass != $info['password']){
  		die('Incorrect password, please <a href="login.php">try again</a>.');
  	}
 	
 	else{ // if login is ok then we add a cookie 
-		$_POST['username'] = stripslashes($_POST['username']); 
 		$hour = time() + 3600; 
-		setcookie(ID_your_site, $_POST['username'], $hour); 
-		setcookie(Key_your_site, $_POST['pass'], $hour);	 
- 
+		setcookie('ID_your_site', stripslashes($_POST['username']), $hour); 
+		setcookie('Key_your_site', $pass, $hour);
+
 		//then redirect them to the members area 
-		header("Location: members.php"); 
+		header("Location: members.php");
+		exit();
 	}
 }
 }
@@ -93,6 +93,8 @@ else{
  </table> 
 
  </form> 
+
+ <p>Don't have an account? <a href="add.php"><button type="button">Sign Up</button></a></p>
 
  <?php 
  }

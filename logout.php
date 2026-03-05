@@ -1,7 +1,6 @@
 <?php 
- $past = time() - 100; 
- //this makes the time in the past to destroy the cookie 
- setcookie(ID_my_site, gone, $past); 
- setcookie(Key_my_site, gone, $past); 
+ $past = time() - 3600; 
+ setcookie('ID_your_site', '', $past); 
+ setcookie('Key_your_site', '', $past); 
  header("Location: login.php"); 
  ?> 

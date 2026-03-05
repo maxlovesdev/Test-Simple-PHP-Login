@@ -73,6 +73,8 @@ value="Register"></th></tr> </table>
 
  </form>
 
+ <p>Already have an account? <a href="login.php"><button type="button">Log In</button></a></p>
+
  <?php
  }
  ?> 
